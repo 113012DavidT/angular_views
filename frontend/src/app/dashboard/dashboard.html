@@ -1,0 +1,176 @@
+<div class="min-h-screen bg-white flex flex-col">
+
+  <!-- NAV SUPERIOR -->
+  <div class="bg-white border-b border-gray-200 sticky top-0 z-20 px-4 py-4 flex items-center justify-between shadow-sm">
+
+    <!-- Botón Hamburguesa -->
+    <button 
+      (click)="showMenu = true"
+      class="p-2 rounded-lg hover:bg-gray-100 transition md:hidden">
+      <i class="pi pi-bars text-2xl text-gray-700"></i>
+    </button>
+
+    <!-- Título -->
+    <div class="flex items-center gap-3 flex-1 md:flex-none">
+      <div class="bg-gradient-to-br from-blue-600 to-blue-700 p-2 rounded-lg">
+        <i class="pi pi-microchip text-2xl text-white"></i>
+      </div>
+      <span class="font-bold text-2xl text-gray-800">ESP32 Dashboard</span>
+    </div>
+
+    <!-- Usuario -->
+    <div class="flex items-center gap-3 ml-auto">
+      <div class="text-right hidden sm:block">
+        <div class="text-sm text-gray-500">Conectado como</div>
+        <div class="font-semibold text-gray-800">{{ currentUser.username }}</div>
+      </div>
+      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+        <i class="pi pi-user text-white"></i>
+      </div>
+      <!-- Logout button -->
+      <button (click)="logout()" class="hidden sm:inline p-2 rounded-lg hover:bg-gray-100 transition" title="Cerrar sesión">
+        <i class="pi pi-sign-out text-xl text-gray-600 hover:text-red-600"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div *ngIf="showMenu" class="fixed inset-0 z-30 bg-black/50" (click)="showMenu = false"></div>
+  <div [class.translate-x-0]="showMenu" [class.-translate-x-full]="!showMenu" 
+       class="fixed left-0 top-0 h-screen w-64 bg-white shadow-lg z-40 transform transition-transform duration-300 flex flex-col">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i class="pi pi-user text-2xl"></i>
+        <span class="text-xl font-bold">Menú</span>
+      </div>
+      <button (click)="showMenu = false" class="p-1 hover:bg-blue-600 rounded">
+        <i class="pi pi-times text-xl"></i>
+      </button>
+    </div>
+
+    <!-- Menu Items -->
+    <nav class="flex-1 p-4 space-y-2">
+      <a *ngFor="let item of menuItems" 
+         [routerLink]="item.routerLink" 
+         (click)="showMenu = false"
+         class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-100 transition text-gray-700 hover:text-blue-700">
+        <i [class]="item.icon + ' text-lg'"></i>
+        <span class="font-medium">{{ item.label }}</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="flex-1 flex flex-col items-center justify-start p-4 sm:p-8">
+    <div class="w-full max-w-6xl">
+
+      <h2 class="text-3xl md:text-4xl font-bold mb-8 text-gray-800">
+        ¡Bienvenido, <span class="text-blue-600">{{ currentUser.username || 'usuario' }}</span>!
+      </h2>
+
+      <!-- Stats Grid - Responsive -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+        <!-- Temperature Card -->
+        <div class="rounded-xl shadow-md border border-gray-100 bg-gradient-to-br from-orange-50 to-red-50 p-8 flex flex-col items-center hover:shadow-lg transition">
+          <div class="bg-gradient-to-br from-orange-500 to-red-500 rounded-full p-4 mb-4">
+            <i class="pi pi-sun text-white text-3xl"></i>
+          </div>
+          <div class="text-center">
+            <div class="text-gray-600 text-sm font-medium mb-2 uppercase tracking-wide">Temperatura</div>
+            <div class="text-5xl font-extrabold text-gray-800">{{ sensorData.temperature }}<span class="text-2xl">°C</span></div>
+            <div class="text-xs text-gray-500 mt-2">Normal</div>
+          </div>
+        </div>
+
+        <!-- Humidity Card -->
+        <div class="rounded-xl shadow-md border border-gray-100 bg-gradient-to-br from-blue-50 to-cyan-50 p-8 flex flex-col items-center hover:shadow-lg transition">
+          <div class="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full p-4 mb-4">
+            <i class="pi pi-cloud text-white text-3xl"></i>
+          </div>
+          <div class="text-center">
+            <div class="text-gray-600 text-sm font-medium mb-2 uppercase tracking-wide">Humedad</div>
+            <div class="text-5xl font-extrabold text-gray-800">{{ sensorData.humidity }}<span class="text-2xl">%</span></div>
+            <div class="text-xs text-gray-500 mt-2">Óptima</div>
+          </div>
+        </div>
+
+        <!-- Status Card -->
+        <div class="rounded-xl shadow-md border border-gray-100 bg-gradient-to-br from-green-50 to-emerald-50 p-8 flex flex-col items-center hover:shadow-lg transition">
+          <div class="bg-gradient-to-br from-green-500 to-emerald-500 rounded-full p-4 mb-4">
+            <i class="pi pi-wifi text-white text-3xl"></i>
+          </div>
+          <div class="text-center">
+            <div class="text-gray-600 text-sm font-medium mb-2 uppercase tracking-wide">Estado ESP32</div>
+            <div class="text-3xl font-extrabold text-gray-800">{{ sensorData.status }}</div>
+            <div class="text-xs mt-2" [ngClass]="{
+              'text-green-600': sensorData.status === 'Conectado',
+              'text-red-600': sensorData.status === 'Desconectado'
+            }">
+              <i [class]="sensorData.status === 'Conectado' ? 'pi pi-check-circle' : 'pi pi-times-circle'"></i>
+              {{ sensorData.status === 'Conectado' ? 'En línea' : 'Desconectado' }}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Info & Quick Actions -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Info Card -->
+        <div class="rounded-xl shadow-md border border-gray-100 bg-white p-6 hover:shadow-lg transition">
+          <div class="flex items-center mb-4">
+            <div class="bg-blue-100 rounded-full p-3 mr-3">
+              <i class="pi pi-info-circle text-blue-600 text-xl"></i>
+            </div>
+            <span class="font-bold text-gray-800 text-lg">Información del Sistema</span>
+          </div>
+          <ul class="text-gray-600 text-sm space-y-3">
+            <li class="flex items-start">
+              <i class="pi pi-check-circle text-green-500 mr-2 mt-0.5 flex-shrink-0"></i>
+              <span>Dashboard listo para recibir datos del ESP32</span>
+            </li>
+            <li class="flex items-start">
+              <i class="pi pi-clock text-blue-500 mr-2 mt-0.5 flex-shrink-0"></i>
+              <span>Datos actualizados cada 3 segundos</span>
+            </li>
+            <li class="flex items-start">
+              <i class="pi pi-mobile text-purple-500 mr-2 mt-0.5 flex-shrink-0"></i>
+              <span>PWA instalable en tu dispositivo</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="rounded-xl shadow-md border border-gray-100 bg-white p-6 hover:shadow-lg transition">
+          <div class="flex items-center mb-4">
+            <div class="bg-purple-100 rounded-full p-3 mr-3">
+              <i class="pi pi-chart-bar text-purple-600 text-xl"></i>
+            </div>
+            <span class="font-bold text-gray-800 text-lg">Estadísticas</span>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+              <span class="text-gray-600">Última actualización</span>
+              <span class="font-semibold text-gray-800">Ahora</span>
+            </div>
+            <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+              <span class="text-gray-600">Temperatura máxima</span>
+              <span class="font-semibold text-gray-800">28°C</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Disponibilidad</span>
+              <span class="font-semibold text-green-600">99.8%</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>

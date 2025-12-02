@@ -1,0 +1,57 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <p-toast></p-toast>
+
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+
+        <!-- TITULO -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Iniciar sesión</h1>
+            <p class="text-gray-600 mt-1">Accede al panel de control ESP32</p>
+        </div>
+
+        <!-- FORM -->
+        <form (ngSubmit)="onLogin()" class="space-y-6">
+
+            <!-- USUARIO -->
+            <div>
+                <label class="block text-sm font-medium mb-1 text-gray-700">Usuario</label>
+                <input
+                    pInputText
+                    [(ngModel)]="credentials.username"
+                    name="username"
+                    class="w-full p-inputtext-lg"
+                    placeholder="Ingresa tu usuario"
+                    [disabled]="loading"
+                />
+            </div>
+
+            <!-- CONTRASEÑA -->
+            <div>
+                <label class="block text-sm font-medium mb-1 text-gray-700">Contraseña</label>
+                <div class="w-full">
+                    <p-password
+                        [(ngModel)]="credentials.password"
+                        name="password"
+                        [toggleMask]="false"
+                        [feedback]="false"
+                        styleClass="w-full"
+                        inputStyleClass="w-full"
+                        placeholder="Ingresa tu contraseña"
+                        [disabled]="loading"
+                    ></p-password>
+                </div>
+            </div>
+
+            <!-- BOTÓN -->
+            <button
+                pButton
+                type="submit"
+                label="Iniciar sesión"
+                icon="pi pi-sign-in"
+                class="w-full p-button-lg font-semibold"
+                [loading]="loading"
+            ></button>
+
+        </form>
+    </div>
+</div>

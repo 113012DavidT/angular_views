@@ -1,0 +1,57 @@
+/* SIDEBAR */
+.menu-sidebar {
+  width: 260px !important;
+  background: white !important;
+  border-radius: 0 16px 16px 0 !important;
+  padding: 1rem !important;
+}
+
+/* Header del sidebar */
+.menu-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+/* Estilo para el menú */
+.custom-menu .p-menuitem-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 1rem;
+  color: #374151;
+  transition: 0.2s all ease;
+}
+
+.custom-menu .p-menuitem-link:hover {
+  background: #e0e7ff;
+  color: #2563eb;
+}
+
+.custom-menu .pi {
+  font-size: 1.3rem;
+}
+
+/* Animación de tarjetas mejorada */
+.rounded-xl {
+  transition: all 0.3s ease;
+}
+
+.rounded-xl:hover {
+  transform: translateY(-4px);
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .rounded-xl {
+    transition: all 0.2s ease;
+  }
+  
+  .rounded-xl:active {
+    transform: translateY(-2px);
+  }
+}
+

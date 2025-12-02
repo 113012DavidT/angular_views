@@ -1,0 +1,23 @@
+/* Campo contraseña sin icono de toggle */
+/* Inputs uniformes */
+.p-inputtext-lg {
+  padding: 0.85rem !important;
+  font-size: 1rem !important;
+  border-radius: 10px !important;
+}
+
+/* Asegura que el ojito NO corte el input */
+.p-password {
+  width: 100% !important;
+}
+
+.p-password input {
+  width: 100% !important;
+}
+
+/* Botón */
+.p-button-lg {
+  padding: 0.9rem !important;
+  font-size: 1rem !important;
+  border-radius: 10px !important;
+}
