@@ -44,7 +44,7 @@ logger.info(f"📁 DATABASE PATH: {DB_PATH}")
 # Credenciales por defecto (fallback si BD no funciona)
 DEFAULT_USERS = {
     'admin': 'admin123',
-    'user': 'password123'
+    'pruebas': 'pruebas123'
 }
 
 def init_database():

@@ -28,11 +28,16 @@ def init_db():
         )
     ''')
     
-    # Insertar usuario de prueba (password: admin123)
+    # Insertar usuarios de prueba (password: admin123 y pruebas123)
     # En producción usar hash apropiado
     cursor.execute('''
         INSERT OR IGNORE INTO users (username, password, email)
         VALUES ('admin', 'admin123', 'admin@example.com')
+    ''')
+    
+    cursor.execute('''
+        INSERT OR IGNORE INTO users (username, password, email)
+        VALUES ('pruebas', 'pruebas123', 'pruebas@example.com')
     ''')
     
     conn.commit()
