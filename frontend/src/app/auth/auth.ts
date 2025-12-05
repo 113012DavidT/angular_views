@@ -22,7 +22,7 @@ export interface AuthResponse {
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = 'https://angular-mdsa.onrender.com/api';
   private currentUserSubject = new BehaviorSubject<any>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
