@@ -49,7 +49,7 @@ export class TelemetryService {
 
   constructor(private http: HttpClient) {
     this.startPollingLastData();
-    this.startPollingAllData();
+    // NO hacer polling de todos los datos, solo cargar una vez
   }
 
   // Polling para último dato cada 5 segundos
@@ -64,22 +64,6 @@ export class TelemetryService {
     ).subscribe(data => {
       if (data) {
         this.lastDataSubject.next(data);
-      }
-    });
-  }
-
-  // Polling para todos los datos cada 5 segundos
-  private startPollingAllData(): void {
-    interval(5000).pipe(
-      startWith(0), // Ejecutar inmediatamente
-      switchMap(() => this.getAllData()),
-      catchError(err => {
-        console.error('❌ Error fetching all telemetry:', err);
-        return of([]);
-      })
-    ).subscribe(data => {
-      if (data && data.length > 0) {
-        this.allDataSubject.next(data);
       }
     });
   }

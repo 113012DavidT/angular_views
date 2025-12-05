@@ -70,14 +70,18 @@ export class Dashboard implements OnInit, OnDestroy {
         }
       });
 
-    // Suscribirse a todos los datos (auto-actualiza cada 5 segundos)
-    this.telemetryService.allData$
+    // Cargar histórico de datos UNA SOLA VEZ al iniciar
+    this.loadTelemetryHistory();
+  }
+
+  private loadTelemetryHistory(): void {
+    this.telemetryService.getAllData()
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => {
         if (data && data.length > 0) {
           this.telemetryHistory = data;
           this.formatDisplayedData();
-          console.log('📊 Telemetry history updated:', data.length, 'records');
+          console.log('📊 Telemetry history loaded:', data.length, 'records');
         }
       });
   }
