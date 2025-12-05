@@ -4,7 +4,7 @@ import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../auth/auth';
 import { TelemetryService, LastTelemetry, TelemetryData } from '../services/telemetry.service';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -56,9 +56,16 @@ export class Dashboard implements OnInit, OnDestroy {
       this.currentUser = user;
     }
 
-    // Suscribirse a los últimos datos del sensor (auto-actualiza cada 5 segundos)
+    // Suscribirse a los últimos datos del sensor (se actualiza cada 3 segundos automáticamente)
     this.telemetryService.lastData$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        tap(data => {
+          if (data) {
+            console.log('🔄 Dashboard updating with latest data:', data.temp, '°C');
+          }
+        })
+      )
       .subscribe(data => {
         if (data) {
           this.sensorData.temperature = data.temp;
@@ -66,7 +73,6 @@ export class Dashboard implements OnInit, OnDestroy {
           this.sensorData.status = "Conectado";
           this.sensorData.lastUpdate = new Date();
           this.isLoading = false;
-          console.log('📊 Last telemetry updated:', data);
         }
       });
 

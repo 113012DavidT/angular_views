@@ -52,20 +52,23 @@ export class TelemetryService {
     // NO hacer polling de todos los datos, solo cargar una vez
   }
 
-  // Polling para último dato cada 5 segundos
+  // Polling para último dato cada 3 segundos (más rápido)
   private startPollingLastData(): void {
-    interval(5000).pipe(
-      startWith(0), // Ejecutar inmediatamente sin esperar 5 segundos
+    interval(3000).pipe(
+      startWith(0), // Ejecutar inmediatamente sin esperar 3 segundos
       switchMap(() => this.getLastData()),
+      tap(data => {
+        if (data) {
+          console.log('✅ Last data updated:', data.temp, '°C');
+          this.lastDataSubject.next(data);
+        }
+      }),
       catchError(err => {
-        console.error('❌ Error fetching last telemetry:', err);
+        console.warn('⚠️ Error fetching last telemetry, retrying...:', err);
+        // Continuar intentando aunque haya error
         return of(null);
       })
-    ).subscribe(data => {
-      if (data) {
-        this.lastDataSubject.next(data);
-      }
-    });
+    ).subscribe();
   }
 
   // GET último dato
