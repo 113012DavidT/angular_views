@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, interval, BehaviorSubject } from 'rxjs';
-import { switchMap, catchError, tap, startWith } from 'rxjs/operators';
+import { switchMap, catchError, tap, startWith, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 export interface TelemetryData {
