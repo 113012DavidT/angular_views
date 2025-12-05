@@ -94,9 +94,9 @@ export class TelemetryService {
     );
   }
 
-  // GET todos los datos
+  // GET todos los datos (limitado a 20 registros)
   getAllData(): Observable<TelemetryData[]> {
-    return this.http.get<TelemetryData[]>(this.apiUrl).pipe(
+    return this.http.get<TelemetryData[]>(`${this.apiUrl}?limit=20`).pipe(
       tap(data => {
         console.log('📊 Telemetry data fetched:', data.length, 'records');
         this.allDataSubject.next(data);

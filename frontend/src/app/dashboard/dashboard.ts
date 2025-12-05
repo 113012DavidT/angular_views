@@ -83,9 +83,8 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   private formatDisplayedData(): void {
-    // Limitar a solo los últimos 20 registros para evitar lag
-    const limitedHistory = this.telemetryHistory.slice(0, 20);
-    this.displayedTelemetry = limitedHistory.map((item, index) => ({
+    // Los datos ya vienen limitados a 20 del servicio
+    this.displayedTelemetry = this.telemetryHistory.map((item, index) => ({
       ...item,
       enviadoPor: this.formatTime(item.timestamp),
       recibidoPor: this.formatTime(item.horaRecepcion),
