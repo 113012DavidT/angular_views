@@ -114,6 +114,13 @@ def login():
             }), 400
         
         conn = get_db_connection()
+        if not conn:
+            logger.error("❌ No se pudo conectar a la BD en login")
+            return jsonify({
+                'success': False,
+                'message': 'Error de conexión a base de datos'
+            }), 500
+            
         user = conn.execute(
             'SELECT * FROM users WHERE username = ? AND password = ?',
             (username, password)
@@ -156,6 +163,12 @@ def get_esp32_data():
     """Obtener últimos datos del ESP32"""
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({
+                'success': False,
+                'message': 'Error de conexión a base de datos'
+            }), 500
+            
         data = conn.execute(
             'SELECT * FROM esp32_data ORDER BY timestamp DESC LIMIT 10'
         ).fetchall()
@@ -167,6 +180,7 @@ def get_esp32_data():
         }), 200
         
     except Exception as e:
+        logger.error(f"❌ Error en get_esp32_data: {str(e)}")
         return jsonify({
             'success': False,
             'message': f'Error: {str(e)}'
@@ -182,6 +196,12 @@ def save_esp32_data():
         status = data.get('status', 'active')
         
         conn = get_db_connection()
+        if not conn:
+            return jsonify({
+                'success': False,
+                'message': 'Error de conexión a base de datos'
+            }), 500
+            
         conn.execute(
             'INSERT INTO esp32_data (temperature, humidity, status) VALUES (?, ?, ?)',
             (temperature, humidity, status)
@@ -195,6 +215,7 @@ def save_esp32_data():
         }), 201
         
     except Exception as e:
+        logger.error(f"❌ Error en save_esp32_data: {str(e)}")
         return jsonify({
             'success': False,
             'message': f'Error: {str(e)}'
