@@ -30,18 +30,31 @@ PORT = int(os.getenv('PORT', 5000))
 
 def get_db_connection():
     """Crear conexión a la base de datos SQLite"""
-    conn = sqlite3.connect('database.db')
+    db_path = os.getenv('DATABASE_PATH', 'database.db')
+    # Asegurar que el directorio existe
+    os.makedirs(os.path.dirname(db_path) if os.path.dirname(db_path) else '.', exist_ok=True)
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
 
-@app.route('/api/login', methods=['POST'])
+@app.route('/api/login', methods=['POST', 'OPTIONS'])
 def login():
     """Endpoint de autenticación"""
+    # Manejar CORS preflight
+    if request.method == 'OPTIONS':
+        return '', 204
+    
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'message': 'Request body vacío'
+            }), 400
+            
         username = data.get('username')
         password = data.get('password')
-        print(f"🔐 LOGIN ATTEMPT: username='{username}', password='{password}'")
+        logger.info(f"🔐 LOGIN ATTEMPT: username='{username}'")
         
         if not username or not password:
             return jsonify({
@@ -56,8 +69,6 @@ def login():
         ).fetchone()
         conn.close()
         
-        print(f"✓ DB QUERY RESULT: user={dict(user) if user else 'NOT FOUND'}")
-        
         if user:
             # Generar token JWT
             token = jwt.encode({
@@ -66,6 +77,7 @@ def login():
                 'exp': datetime.utcnow() + timedelta(hours=24)
             }, app.config['SECRET_KEY'], algorithm='HS256')
             
+            logger.info(f"✓ LOGIN SUCCESS: user={user['username']}")
             return jsonify({
                 'success': True,
                 'token': token,
@@ -75,12 +87,14 @@ def login():
                 }
             }), 200
         else:
+            logger.warning(f"✗ LOGIN FAILED: invalid credentials for {username}")
             return jsonify({
                 'success': False,
                 'message': 'Credenciales inválidas'
             }), 401
             
     except Exception as e:
+        logger.error(f"❌ LOGIN ERROR: {str(e)}")
         return jsonify({
             'success': False,
             'message': f'Error en el servidor: {str(e)}'
