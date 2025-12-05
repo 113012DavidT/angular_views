@@ -87,8 +87,8 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   private formatDisplayedData(): void {
-    // Los datos ya vienen limitados a 20 del servicio
-    this.displayedTelemetry = this.telemetryHistory.map((item, index) => ({
+    // Los datos ya están limitados a 20 en el servicio
+    this.displayedTelemetry = this.telemetryHistory.map((item) => ({
       ...item,
       enviadoPor: this.formatTime(item.timestamp),
       recibidoPor: this.formatTime(item.horaRecepcion),

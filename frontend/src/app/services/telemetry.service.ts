@@ -82,10 +82,14 @@ export class TelemetryService {
   getAllData(): Observable<TelemetryData[]> {
     return this.http.get<TelemetryData[]>(this.apiUrl).pipe(
       tap(data => {
-        // Limitar a solo los primeros 20 registros
+        // Tomar SOLO los primeros 20 registros
         const limited = data.slice(0, 20);
-        console.log('📊 Telemetry data fetched:', limited.length, 'records (de', data.length, 'totales)');
+        console.log('📊 Telemetry data fetched: ' + limited.length + ' records');
         this.allDataSubject.next(limited);
+      }),
+      map(data => {
+        // Retornar solo los primeros 20
+        return data.slice(0, 20);
       }),
       catchError(err => {
         console.error('❌ Error in getAllData:', err);
