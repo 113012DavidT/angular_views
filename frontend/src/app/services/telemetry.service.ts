@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, interval, BehaviorSubject } from 'rxjs';
-import { switchMap, catchError, tap } from 'rxjs/operators';
+import { switchMap, catchError, tap, startWith } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 export interface TelemetryData {
@@ -48,15 +48,17 @@ export class TelemetryService {
   public allData$ = this.allDataSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    this.startPolling();
+    this.startPollingLastData();
+    this.startPollingAllData();
   }
 
-  // Obtener último dato cada 5 segundos
-  private startPolling(): void {
+  // Polling para último dato cada 5 segundos
+  private startPollingLastData(): void {
     interval(5000).pipe(
+      startWith(0), // Ejecutar inmediatamente sin esperar 5 segundos
       switchMap(() => this.getLastData()),
       catchError(err => {
-        console.error('Error fetching telemetry:', err);
+        console.error('❌ Error fetching last telemetry:', err);
         return of(null);
       })
     ).subscribe(data => {
@@ -66,11 +68,27 @@ export class TelemetryService {
     });
   }
 
-  // GET últimdato
+  // Polling para todos los datos cada 5 segundos
+  private startPollingAllData(): void {
+    interval(5000).pipe(
+      startWith(0), // Ejecutar inmediatamente
+      switchMap(() => this.getAllData()),
+      catchError(err => {
+        console.error('❌ Error fetching all telemetry:', err);
+        return of([]);
+      })
+    ).subscribe(data => {
+      if (data && data.length > 0) {
+        this.allDataSubject.next(data);
+      }
+    });
+  }
+
+  // GET último dato
   getLastData(): Observable<LastTelemetry> {
     return this.http.get<LastTelemetry>(`${this.apiUrl}/last`).pipe(
       catchError(err => {
-        console.error('Error:', err);
+        console.error('❌ Error in getLastData:', err);
         return of(null as any);
       })
     );
@@ -79,9 +97,12 @@ export class TelemetryService {
   // GET todos los datos
   getAllData(): Observable<TelemetryData[]> {
     return this.http.get<TelemetryData[]>(this.apiUrl).pipe(
-      tap(data => this.allDataSubject.next(data)),
+      tap(data => {
+        console.log('📊 Telemetry data fetched:', data.length, 'records');
+        this.allDataSubject.next(data);
+      }),
       catchError(err => {
-        console.error('Error:', err);
+        console.error('❌ Error in getAllData:', err);
         return of([]);
       })
     );
@@ -91,7 +112,7 @@ export class TelemetryService {
   getCount(): Observable<{ total_registros: number }> {
     return this.http.get<{ total_registros: number }>(`${this.apiUrl}/count`).pipe(
       catchError(err => {
-        console.error('Error:', err);
+        console.error('❌ Error in getCount:', err);
         return of({ total_registros: 0 });
       })
     );

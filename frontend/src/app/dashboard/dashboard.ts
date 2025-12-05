@@ -56,7 +56,7 @@ export class Dashboard implements OnInit, OnDestroy {
       this.currentUser = user;
     }
 
-    // Suscribirse a los últimos datos del sensor
+    // Suscribirse a los últimos datos del sensor (auto-actualiza cada 5 segundos)
     this.telemetryService.lastData$
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => {
@@ -66,19 +66,19 @@ export class Dashboard implements OnInit, OnDestroy {
           this.sensorData.status = "Conectado";
           this.sensorData.lastUpdate = new Date();
           this.isLoading = false;
+          console.log('📊 Last telemetry updated:', data);
         }
       });
 
-    // Cargar histórico de datos
-    this.loadTelemetryHistory();
-  }
-
-  private loadTelemetryHistory(): void {
-    this.telemetryService.getAllData()
+    // Suscribirse a todos los datos (auto-actualiza cada 5 segundos)
+    this.telemetryService.allData$
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => {
-        this.telemetryHistory = data;
-        this.formatDisplayedData();
+        if (data && data.length > 0) {
+          this.telemetryHistory = data;
+          this.formatDisplayedData();
+          console.log('📊 Telemetry history updated:', data.length, 'records');
+        }
       });
   }
 
