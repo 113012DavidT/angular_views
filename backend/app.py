@@ -6,12 +6,17 @@ from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 import logging
+import sys
 
 # Cargar variables de entorno
 load_dotenv()
 
 # Configurar logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    stream=sys.stdout
+)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
@@ -28,14 +33,60 @@ CORS(app,
 # Obtener puerto del entorno (Render usa PORT)
 PORT = int(os.getenv('PORT', 5000))
 
+# Ruta de la BD
+DB_PATH = os.getenv('DATABASE_PATH', 'database.db')
+
+def init_database():
+    """Inicializar la base de datos si no existe"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        # Crear tabla de usuarios
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                email TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        # Crear tabla de datos ESP32
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS esp32_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                temperature REAL,
+                humidity REAL,
+                status TEXT,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        # Insertar usuario de prueba
+        cursor.execute('''
+            INSERT OR IGNORE INTO users (username, password, email)
+            VALUES ('admin', 'admin123', 'admin@example.com')
+        ''')
+        
+        conn.commit()
+        conn.close()
+        logger.info("✅ Base de datos inicializada correctamente")
+        return True
+    except Exception as e:
+        logger.error(f"❌ Error inicializando BD: {str(e)}")
+        return False
+
 def get_db_connection():
     """Crear conexión a la base de datos SQLite"""
-    db_path = os.getenv('DATABASE_PATH', 'database.db')
-    # Asegurar que el directorio existe
-    os.makedirs(os.path.dirname(db_path) if os.path.dirname(db_path) else '.', exist_ok=True)
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    except Exception as e:
+        logger.error(f"❌ Error conectando a BD: {str(e)}")
+        return None
 
 @app.route('/api/login', methods=['POST', 'OPTIONS'])
 def login():
