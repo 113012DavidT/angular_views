@@ -5,14 +5,28 @@ import jwt
 from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
+import logging
 
 # Cargar variables de entorno
 load_dotenv()
 
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
+app.config['JSON_SORT_KEYS'] = False
+
 # Permitir CORS para todos los orígenes y exponer headers comunes
-CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True, expose_headers=["Content-Type", "Authorization"])
+CORS(app, 
+     resources={r"/api/*": {"origins": "*"}}, 
+     supports_credentials=True, 
+     expose_headers=["Content-Type", "Authorization"],
+     allow_headers=["Content-Type", "Authorization"])
+
+# Obtener puerto del entorno (Render usa PORT)
+PORT = int(os.getenv('PORT', 5000))
 
 def get_db_connection():
     """Crear conexión a la base de datos SQLite"""
@@ -130,10 +144,14 @@ def health_check():
     }), 200
 
 if __name__ == '__main__':
-    print("🚀 Iniciando servidor Flask en http://localhost:5000")
-    print("📊 Endpoints disponibles:")
-    print("   - POST /api/login")
-    print("   - GET  /api/esp32/data")
-    print("   - POST /api/esp32/data")
-    print("   - GET  /api/health")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    logger.info("🚀 Iniciando servidor Flask")
+    logger.info(f"📊 Puerto: {PORT}")
+    logger.info("📊 Endpoints disponibles:")
+    logger.info("   - POST /api/login")
+    logger.info("   - GET  /api/esp32/data")
+    logger.info("   - POST /api/esp32/data")
+    logger.info("   - GET  /api/health")
+    
+    # En desarrollo: debug=True, en producción: debug=False
+    debug = os.getenv('FLASK_ENV') == 'development'
+    app.run(debug=debug, host='0.0.0.0', port=PORT)
